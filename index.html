@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Questo è il CSS */
+      *::before *::after {
+        /* Il reset del css */
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        outline: none;
+      }
+      body {
+        background-image: url(./assets/bg.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        color: white;
+        font-family: "Outfit", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 50px;
+        height: 100vh;
+        position: relative;
+      }
+      img {
+        width: 40%;
+        margin-top: 32px;
+        display: inline-block;
+        text-align: start;
+        margin-left: 100px;
+      }
+      p {
+        text-align: center;
+        margin-top: 200px;
+        font-size: 30px;
+      }
+      .center-container {
+        display: flex;
+        justify-content: center;
+        gap: 100px;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        background: blue;
+        color: blanchedalmond;
+      }
+      button.vero {
+        background-color: green;
+      }
+      button.falso {
+        background-color: red;
+      }
+      button.pagina-successiva {
+        background: rgb(38, 0, 255);
+        bottom: 20px;
+        right: 20px;
+        position: absolute;
+      }
+      #timer-container {
+        /* Il container delle div */
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 200px;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+      }
+      .circle {
+        stroke-dasharray: 565.48;
+        stroke-dashoffset: 565.48;
+        transition: stroke-dashoffset 60s linear;
+      }
+      /* Il timer */
+      #timer {
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        font-size: 2em;
+        font-weight: bold;
+        z-index: 1; /* Posizionamento sopra il cerchio */
+      }
+      #label-top {
+        /* Posiziona sopra il timer (SECONDI) */
+        font-size: 1em;
+        font-weight: bold;
+        margin: 0;
+        padding: 30px;
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        z-index: 1; /* Posizionamento sopra il cerchio */
+      }
+
+      #label-bottom {
+        /* Posizionamento del sotto (RIMANENTI)*/
+        font-weight: bold;
+        font-size: 15px;
+        margin: 0;
+        padding: 3px;
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        z-index: 1; /* Posizionamento sopra il cerchio */
+      }
+      /* Tutto il tuo CSS esistente per il timer, ecc. */
+
+#quiz-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+    </style>
+    <title>Quiz Game</title>
+  </head>
+  <body>
+    <div id="timer-container">
+      <div id="label-top">SECONDI</div>
+      <svg width="200" height="200">
+        <circle
+          cx="100"
+          cy="100"
+          r="61"
+          stroke="white"
+          stroke-width="25"
+          fill="none"
+        />
+        <circle
+          id="progress"
+          class="circle"
+          cx="100"
+          cy="100"
+          r="61"
+          stroke="purple"
+          stroke-width="25"
+          fill="none"
+        />
+      </svg>
+      <div id="timer">60</div>
+      <div id="label-bottom">RIMANENTI</div>
+    </div>
+    <div id="quiz-container">
+      <p id="question"></p>
+      <div id="answers"></div>
+      <div id="quiz-container">
+        <p id="question"></p>
+        <div id="answers"></div>
+        <button id="next-button" class="pagina-successiva">Pagina Successiva</button>
+    
+      <button id="next-button" class="pagina-successiva">
+        Pagina Successiva
+      </button>
+    </div>
+    <script>
+      
+      window.onload = function () {
+    let time = 60;
+    let score = 0;
+    let currentQuestionIndex = 0;
+
+    const timerElement = document.getElementById("timer");
+    const progressElement = document.getElementById("progress");
+    const questionElement = document.getElementById("question");
+    const answersElement = document.getElementById("answers");
+    const nextButton = document.getElementById("next-button");
+
+    // qui le domande...
+
+     const questions = [
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question: "What does CPU stand for?",
+          correct_answer: "Central Processing Unit",
+          incorrect_answers: [
+            "Central Process Unit",
+            "Computer Personal Unit",
+            "Central Processor Unit",
+          ],
+        },
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question:
+            "In the programming language Java, which of these keywords would you put on a variable to make sure it doesn&#039;t get modified?",
+          correct_answer: "Final",
+          incorrect_answers: ["Static", "Private", "Public"],
+        },
+        {
+          category: "Science: Computers",
+          type: "boolean",
+          difficulty: "easy",
+          question: "The logo for Snapchat is a Bell.",
+          correct_answer: "False",
+          incorrect_answers: ["True"],
+        },
+        {
+          category: "Science: Computers",
+          type: "boolean",
+          difficulty: "easy",
+          question:
+            "Pointers were not used in the original C programming language; they were added later on in C++.",
+          correct_answer: "False",
+          incorrect_answers: ["True"],
+        },
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question:
+            "What is the most preferred image format used for logos in the Wikimedia database?",
+          correct_answer: ".svg",
+          incorrect_answers: [".png", ".jpeg", ".gif"],
+        },
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question: "In web design, what does CSS stand for?",
+          correct_answer: "Cascading Style Sheet",
+          incorrect_answers: [
+            "Counter Strike: Source",
+            "Corrective Style Sheet",
+            "Computer Style Sheet",
+          ],
+        },
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question:
+            "What is the code name for the mobile operating system Android 7.0?",
+          correct_answer: "Nougat",
+          incorrect_answers: [
+            "Ice Cream Sandwich",
+            "Jelly Bean",
+            "Marshmallow",
+          ],
+        },
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question: "On Twitter, what is the character limit for a Tweet?",
+          correct_answer: "140",
+          incorrect_answers: ["120", "160", "100"],
+        },
+        {
+          category: "Science: Computers",
+          type: "boolean",
+          difficulty: "easy",
+          question: "Linux was first created as an alternative to Windows XP.",
+          correct_answer: "False",
+          incorrect_answers: ["True"],
+        },
+        {
+          category: "Science: Computers",
+          type: "multiple",
+          difficulty: "easy",
+          question:
+            "Which programming language shares its name with an island in Indonesia?",
+          correct_answer: "Java",
+          incorrect_answers: ["Python", "C", "Jakarta"],
+        },
+      ];
+
+    const updateTimer = () => {
+        if (time >= 0) {
+            timerElement.innerText = time;
+            const offset = (565.48 * (60 - time)) / 60;
+            progressElement.style.strokeDashoffset = offset;
+            time--;
+        } else {
+            clearInterval(timerInterval);
+            loadNextQuestion();
+        }
+    };
+
+    const timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+// Fine del timer mettendo le  domande messo il codice cosi si aggiorna alla prossima domanda
+    const loadNextQuestion = () => {
+        if (currentQuestionIndex < questions.length) {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionElement.innerText = currentQuestion.question;
+            answersElement.innerHTML = '';
+
+            if (currentQuestion.type === "multiple") {
+                const allAnswers = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
+                allAnswers.sort(() => Math.random() - 0.5);
+                allAnswers.forEach(answer => {
+                    const button = document.createElement("button");
+                    button.innerText = answer;
+                    button.onclick = () => checkAnswer(answer, currentQuestion.correct_answer);
+                    answersElement.appendChild(button);
+                });
+            } else if (currentQuestion.type === "boolean") {
+                ["True", "False"].forEach(answer => {
+                    const button = document.createElement("button");
+                    button.innerText = answer;
+                    button.onclick = () => checkAnswer(answer, currentQuestion.correct_answer);
+                    answersElement.appendChild(button);
+                });
+            }
+            currentQuestionIndex++;
+            time = 60;
+        } else {
+            alert(`Quiz completato! Il tuo punteggio è ${score}.`);
+        }
+    };
+
+    const checkAnswer = (selectedAnswer, correctAnswer) => {
+        if (selectedAnswer === correctAnswer) {
+            score++;
+            
+        } else {
+    
+        }
+        loadNextQuestion();
+    };
+
+    nextButton.addEventListener("click", loadNextQuestion);
+
+    loadNextQuestion();
+};
+
+    </script>
+  </body>
+</html>
